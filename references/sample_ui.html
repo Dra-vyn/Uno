@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UNO Multiplayer UI</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      background:
+        radial-gradient(circle at center, #ff6b1a 0%, #b31217 45%, #5f0000 100%);
+      overflow: hidden;
+      color: white;
+    }
+
+    .game-container {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+    }
+
+    /* LEFT PANEL */
+
+    .sidebar {
+      position: absolute;
+      left: 20px;
+      top: 20px;
+      width: 260px;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .logo {
+      font-size: 42px;
+      font-weight: bold;
+      color: #ffe600;
+      text-shadow: 3px 3px 0 #000;
+      margin-bottom: 25px;
+    }
+
+    .room-info {
+      margin-bottom: 25px;
+    }
+
+    .room-info h3 {
+      margin-bottom: 10px;
+      font-size: 24px;
+    }
+
+    .divider {
+      height: 1px;
+      background: rgba(255,255,255,0.15);
+      margin: 20px 0;
+    }
+
+    .players-title {
+      margin-bottom: 15px;
+      font-size: 20px;
+    }
+
+    .player-item {
+      background: rgba(255,255,255,0.08);
+      padding: 14px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .player-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #3b82f6;
+    }
+
+    .online-dot {
+      width: 10px;
+      height: 10px;
+      background: #22c55e;
+      border-radius: 50%;
+    }
+
+    .start-btn {
+      width: 100%;
+      margin-top: 15px;
+      padding: 16px;
+      border: none;
+      border-radius: 14px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      background: linear-gradient(to bottom, #3b82f6, #1d4ed8);
+      color: white;
+      transition: 0.2s;
+    }
+
+    .start-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    /* CENTER TABLE */
+
+    .table-area {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .center-circle {
+      width: 520px;
+      height: 520px;
+      border-radius: 50%;
+      border: 8px solid rgba(255,255,255,0.06);
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .pile-container {
+      display: flex;
+      gap: 80px;
+      align-items: center;
+    }
+
+    .deck,
+    .discard {
+      width: 110px;
+      height: 160px;
+      border-radius: 18px;
+      position: relative;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+    }
+
+    .deck {
+      background: linear-gradient(135deg, #111, #333);
+      border: 4px solid white;
+    }
+
+    .deck::after {
+      content: "UNO";
+      position: absolute;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 32px;
+      font-weight: bold;
+      color: #ffe600;
+      transform: rotate(-20deg);
+    }
+
+    .discard {
+      background: #e11d48;
+      border: 6px solid white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 72px;
+      font-weight: bold;
+    }
+
+    /* OPPONENT */
+
+    .top-player {
+      position: absolute;
+      top: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+    }
+
+    .top-avatar {
+      width: 90px;
+      height: 90px;
+      background: #60a5fa;
+      border-radius: 50%;
+      margin: auto;
+      margin-bottom: 12px;
+      border: 4px solid white;
+    }
+
+    .opponent-cards {
+      display: flex;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .op-card {
+      width: 70px;
+      height: 100px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #111, #333);
+      border: 3px solid white;
+    }
+
+    /* PLAYER HAND */
+
+    .bottom-section {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 900px;
+      text-align: center;
+    }
+
+    .your-info {
+      margin-bottom: 20px;
+    }
+
+    .your-hand {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 25px;
+    }
+
+    .card {
+      width: 120px;
+      height: 180px;
+      border-radius: 18px;
+      background: white;
+      position: relative;
+      color: white;
+      font-size: 72px;
+      font-weight: bold;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: 0.2s;
+      border: 5px solid white;
+    }
+
+    .card:hover {
+      transform: translateY(-12px);
+    }
+
+    .red { background: #ef4444; }
+    .yellow { background: #facc15; color: black; }
+    .green { background: #22c55e; }
+    .blue { background: #3b82f6; }
+
+    .actions {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .action-btn {
+      padding: 18px 40px;
+      border: none;
+      border-radius: 16px;
+      font-size: 22px;
+      font-weight: bold;
+      cursor: pointer;
+      color: white;
+      transition: 0.2s;
+    }
+
+    .play-btn {
+      background: linear-gradient(to bottom, #2563eb, #1e40af);
+    }
+
+    .draw-btn {
+      background: rgba(0,0,0,0.45);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    /* TURN PANEL */
+
+    .turn-panel {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 230px;
+      padding: 24px;
+      border-radius: 20px;
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px);
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .turn-panel h2 {
+      margin-bottom: 20px;
+    }
+
+    .turn-player {
+      font-size: 36px;
+      color: #3b82f6;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .timer {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      border: 10px solid #3b82f6;
+      margin: auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 42px;
+      font-weight: bold;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="game-container">
+
+    <!-- LEFT PANEL -->
+
+    <div class="sidebar">
+      <div class="logo">UNO</div>
+
+      <div class="room-info">
+        <h3>Room: ABC123</h3>
+        <p>Mode: Classic</p>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="players-title">Players (2/2)</div>
+
+      <div class="player-item">
+        <div class="player-left">
+          <div class="avatar"></div>
+          <span>You (Host)</span>
+        </div>
+        <div class="online-dot"></div>
+      </div>
+
+      <div class="player-item">
+        <div class="player-left">
+          <div class="avatar"></div>
+          <span>Player 2</span>
+        </div>
+        <div class="online-dot"></div>
+      </div>
+
+      <button class="start-btn">
+        Start Game
+      </button>
+    </div>
+
+    <!-- OPPONENT -->
+
+    <div class="top-player">
+      <div class="top-avatar"></div>
+      <h2>Player 2</h2>
+
+      <div class="opponent-cards">
+        <div class="op-card"></div>
+        <div class="op-card"></div>
+        <div class="op-card"></div>
+        <div class="op-card"></div>
+        <div class="op-card"></div>
+        <div class="op-card"></div>
+        <div class="op-card"></div>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+
+    <div class="table-area">
+      <div class="center-circle">
+
+        <div class="pile-container">
+
+          <div class="deck"></div>
+
+          <div class="discard">
+            5
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TURN INFO -->
+
+    <div class="turn-panel">
+      <h2>Current Turn</h2>
+
+      <div class="turn-player">
+        You
+      </div>
+
+      <div class="timer">
+        30
+      </div>
+    </div>
+
+    <!-- PLAYER HAND -->
+
+    <div class="bottom-section">
+
+      <div class="your-info">
+        <h2>You (Host)</h2>
+      </div>
+
+      <div class="your-hand">
+
+        <div class="card red">2</div>
+
+        <div class="card yellow">3</div>
+
+        <div class="card green">7</div>
+
+        <div class="card yellow">8</div>
+
+        <div class="card blue">9</div>
+
+        <div class="card blue">4</div>
+
+      </div>
+
+      <div class="actions">
+        <button class="action-btn play-btn">
+          Play Card
+        </button>
+
+        <button class="action-btn draw-btn">
+          Draw Card
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+</body>
+</html>

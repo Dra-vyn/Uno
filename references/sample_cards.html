@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <title>UNO Cards</title>
+
+  <style>
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial, Helvetica, sans-serif;
+    }
+
+    body{
+      background:#18181b;
+      padding:40px;
+      color:white;
+    }
+
+    h1{
+      margin-bottom:30px;
+    }
+
+    .section{
+      margin-bottom:60px;
+    }
+
+    .cards{
+      display:flex;
+      flex-wrap:wrap;
+      gap:20px;
+    }
+
+    /* ---------------- CARD BASE ---------------- */
+
+    .card{
+      width:120px;
+      height:180px;
+      border-radius:18px;
+      position:relative;
+      overflow:hidden;
+      border:6px solid white;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      font-weight:bold;
+      box-shadow:0 10px 25px rgba(0,0,0,0.35);
+    }
+
+    .card::before{
+      content:"";
+      position:absolute;
+      width:180px;
+      height:180px;
+      background:rgba(255,255,255,0.15);
+      border-radius:50%;
+      transform:rotate(-35deg);
+    }
+
+    .number{
+      font-size:72px;
+      z-index:2;
+      color:white;
+      text-shadow:3px 3px rgba(0,0,0,0.35);
+    }
+
+    .corner{
+      position:absolute;
+      font-size:22px;
+      font-weight:bold;
+      z-index:2;
+    }
+
+    .top-left{
+      top:10px;
+      left:12px;
+    }
+
+    .bottom-right{
+      bottom:10px;
+      right:12px;
+      transform:rotate(180deg);
+    }
+
+    /* ---------------- COLORS ---------------- */
+
+    .red{
+      background:#ef4444;
+    }
+
+    .blue{
+      background:#3b82f6;
+    }
+
+    .green{
+      background:#22c55e;
+    }
+
+    .yellow{
+      background:#facc15;
+      color:black;
+    }
+
+    .yellow .number,
+    .yellow .corner{
+      color:black;
+    }
+
+    /* ---------------- ACTION CARD TEXT ---------------- */
+
+    .symbol{
+      z-index:2;
+      font-size:56px;
+      color:white;
+      text-shadow:3px 3px rgba(0,0,0,0.35);
+    }
+
+    .yellow .symbol{
+      color:black;
+    }
+
+    /* ---------------- WILD CARD ---------------- */
+
+    .wild{
+      background:black;
+    }
+
+    .wild-grid{
+      width:70px;
+      height:70px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      z-index:2;
+      border-radius:50%;
+      overflow:hidden;
+      transform:rotate(45deg);
+    }
+
+    .wild-grid div:nth-child(1){
+      background:#ef4444;
+    }
+
+    .wild-grid div:nth-child(2){
+      background:#3b82f6;
+    }
+
+    .wild-grid div:nth-child(3){
+      background:#22c55e;
+    }
+
+    .wild-grid div:nth-child(4){
+      background:#facc15;
+    }
+
+  </style>
+
+</head>
+<body>
+
+  <h1>UNO Card Types</h1>
+
+  <!-- NUMBER CARDS -->
+
+  <div class="section">
+
+    <h2>Number Cards</h2>
+
+    <br/>
+
+    <div class="cards">
+
+      <div class="card red">
+        <div class="corner top-left">5</div>
+        <div class="number">5</div>
+        <div class="corner bottom-right">5</div>
+      </div>
+
+      <div class="card blue">
+        <div class="corner top-left">8</div>
+        <div class="number">8</div>
+        <div class="corner bottom-right">8</div>
+      </div>
+
+      <div class="card green">
+        <div class="corner top-left">2</div>
+        <div class="number">2</div>
+        <div class="corner bottom-right">2</div>
+      </div>
+
+      <div class="card yellow">
+        <div class="corner top-left">9</div>
+        <div class="number">9</div>
+        <div class="corner bottom-right">9</div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- REVERSE -->
+
+  <div class="section">
+
+    <h2>Reverse Cards</h2>
+
+    <br/>
+
+    <div class="cards">
+
+      <div class="card red">
+        <div class="corner top-left">↺</div>
+        <div class="symbol">↺</div>
+        <div class="corner bottom-right">↺</div>
+      </div>
+
+      <div class="card blue">
+        <div class="corner top-left">↺</div>
+        <div class="symbol">↺</div>
+        <div class="corner bottom-right">↺</div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- SKIP -->
+
+  <div class="section">
+
+    <h2>Skip Cards</h2>
+
+    <br/>
+
+    <div class="cards">
+
+      <div class="card green">
+        <div class="corner top-left">⊘</div>
+        <div class="symbol">⊘</div>
+        <div class="corner bottom-right">⊘</div>
+      </div>
+
+      <div class="card yellow">
+        <div class="corner top-left">⊘</div>
+        <div class="symbol">⊘</div>
+        <div class="corner bottom-right">⊘</div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- +1 -->
+
+  <div class="section">
+
+    <h2>+1 Cards</h2>
+
+    <br/>
+
+    <div class="cards">
+
+      <div class="card red">
+        <div class="corner top-left">+1</div>
+        <div class="symbol">+1</div>
+        <div class="corner bottom-right">+1</div>
+      </div>
+
+      <div class="card blue">
+        <div class="corner top-left">+1</div>
+        <div class="symbol">+1</div>
+        <div class="corner bottom-right">+1</div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- +2 -->
+
+  <div class="section">
+
+    <h2>+2 Cards</h2>
+
+    <br/>
+
+    <div class="cards">
+
+      <div class="card green">
+        <div class="corner top-left">+2</div>
+        <div class="symbol">+2</div>
+        <div class="corner bottom-right">+2</div>
+      </div>
+
+      <div class="card yellow">
+        <div class="corner top-left">+2</div>
+        <div class="symbol">+2</div>
+        <div class="corner bottom-right">+2</div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- +4 -->
+
+  <div class="section">
+
+    <h2>+4 Wild Cards</h2>
+
+    <br/>
+
+    <div class="cards">
+
+      <div class="card wild">
+
+        <div class="corner top-left">+4</div>
+
+        <div class="wild-grid">
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+
+        <div class="corner bottom-right">+4</div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- WILD -->
+
+  <div class="section">
+
+    <h2>Wild Cards</h2>
+
+    <br/>
+
+    <div class="cards">
+
+      <div class="card wild">
+
+        <div class="corner top-left">W</div>
+
+        <div class="wild-grid">
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+
+        <div class="corner bottom-right">W</div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</body>
+</html>
