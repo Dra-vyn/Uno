@@ -1,10 +1,24 @@
 import { useEffect, useMemo, useState } from "react";
 
-function displayCard(card) {
+const CARD_SYMBOLS = {
+  reverse: "↺",
+  skip: "⊘",
+  plus1: "+1",
+  plus2: "+2",
+  plus4: "+4",
+  wild: "W",
+};
+
+function getCardSymbol(card) {
   if (!card) {
     return "??";
   }
-  return card.display;
+
+  if (card.type === "number") {
+    return card.display ?? card.value ?? "?";
+  }
+
+  return CARD_SYMBOLS[card.type] || card.display || "?";
 }
 
 function isCardPlayable(card, state) {
@@ -46,6 +60,36 @@ function isCardPlayable(card, state) {
   return card.type !== "number" && top.type === card.type;
 }
 
+function renderCardFace(card) {
+  const symbol = getCardSymbol(card);
+  const isNumber = card.type === "number";
+  const isWild = card.type === "wild" || card.type === "plus4";
+
+  return (
+    <>
+      <div className="corner top-left">{symbol}</div>
+      {isNumber ? (
+        <div className="number">{symbol}</div>
+      ) : isWild ? (
+        <>
+          <div className="wild-grid">
+            <div />
+            <div />
+            <div />
+            <div />
+          </div>
+          <div className="corner bottom-right">{symbol}</div>
+        </>
+      ) : (
+        <>
+          <div className="symbol">{symbol}</div>
+          <div className="corner bottom-right">{symbol}</div>
+        </>
+      )}
+    </>
+  );
+}
+
 export default function GameBoard({
   state,
   onCardClick,
@@ -60,7 +104,8 @@ export default function GameBoard({
   const self = state.players.find((player) => player.id === state.selfId);
   const opponent = state.players.find((player) => player.id !== state.selfId);
   const isYourTurn = state.selfId === state.activePlayerId && !state.winnerId;
-  const isOpponentActive = opponent?.id === state.activePlayerId;
+  const opponentIsActive = opponent?.id === state.activePlayerId;
+  const selfIsActive = state.selfId === state.activePlayerId;
 
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 200);
@@ -76,149 +121,82 @@ export default function GameBoard({
   }, [state.turnExpiresAt, now]);
 
   return (
-    <div className="game-container">
-      <aside className="sidebar">
-        <div className="logo">UNO</div>
+    <main className="game">
+      <div className="top-bar">
         <div className="room-info">
-          <h3>Room: {state.roomId}</h3>
-          <p>{state.statusMessage}</p>
+          <div className="room-title">Room {state.roomId}</div>
+          <div className="muted">{state.statusMessage}</div>
         </div>
-        <div className="divider" />
-        <div className="players-title">Players ({state.players.length}/2)</div>
-        <div className="player-item">
-          <div className="player-left">
-            <div className="avatar" />
-            <span>
-              {self?.name}
-              {state.selfId === state.hostId ? " (Host)" : ""}
-            </span>
-          </div>
+      </div>
+
+      <div className="player">
+        <div className="player-info">
           <div
-            className={`online-dot ${self?.connected ? "online" : "offline"}`}
-          />
-        </div>
-        {opponent && (
-          <div className="player-item">
-            <div className="player-left">
-              <div className="avatar" />
-              <span>{opponent.name}</span>
-            </div>
-            <div
-              className={`online-dot ${opponent.connected ? "online" : "offline"}`}
-            />
+            className={`avatar ${opponentIsActive ? "timer-avatar" : ""}`}
+            style={opponentIsActive ? { "--timer-progress": `${timerProgress}%` } : undefined}
+          >
+            {opponent?.handSize ?? ""}
           </div>
-        )}
-      </aside>
+          <div>
+            <div className="player-name">{opponent?.name || "Waiting..."}</div>
+            <div className="muted">
+              {opponent ? `${opponent.handSize} cards` : "Waiting for opponent"}
+            </div>
+          </div>
+          {opponentIsActive && <div className="turn-badge">TURN</div>}
+        </div>
 
-      <div className={`top-player ${isOpponentActive ? "active" : ""}`}>
-        <div className="top-avatar" />
-        <h2>{opponent?.name || "Waiting..."}</h2>
-        <div className="opponent-cards">
-          {Array.from({ length: opponent?.handSize || 0 }).map((_, index) => (
-            <div key={index} className="op-card" />
-          ))}
+        <div className="opponent-stack">
+          <div className="stack-card stack-card-1" />
+          <div className="stack-card stack-card-2" />
+          <div className="stack-card stack-card-3" />
+          <div className="stack-count">{opponent?.handSize ?? 0}</div>
         </div>
       </div>
 
-      <div className="table-area">
-        <div className="center-circle">
-          <div className="pile-container">
-            <div className="deck" />
-            <div className="discard">
-              {state.topCard ? (
-                <div className={`card discard-card ${state.topCard.color || state.topCard.type}`}>
-                  <div className="corner top-left">
-                    {state.topCard.type === "wild" || state.topCard.type === "plus4" ? (state.topCard.type === "plus4" ? "+4" : "W") : state.topCard.display}
-                  </div>
-                  {state.topCard.type === "number" ? (
-                    <div className="number">{state.topCard.display}</div>
-                  ) : state.topCard.type === "wild" || state.topCard.type === "plus4" ? (
-                    <>
-                      <div className="symbol">{state.topCard.type === "plus4" ? "+4" : "W"}</div>
-                      <div className="corner bottom-right">{state.topCard.type === "plus4" ? "+4" : "W"}</div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="symbol">{state.topCard.display}</div>
-                      <div className="corner bottom-right">{state.topCard.display}</div>
-                    </>
-                  )}
-                </div>
-              ) : (
-                "UNO"
-              )}
+      <section className="center">
+        <div className="deck" title="Click to draw" onClick={onDraw} />
+        <div className="discard">
+          {state.topCard ? (
+            <div className={`card ${state.topCard.color || state.topCard.type}`}>
+              {renderCardFace(state.topCard)}
             </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="turn-panel">
-        <h2>Current Turn</h2>
-        <div className="turn-player">{activePlayer?.name || "Waiting..."}</div>
-        <div className="timer">
-          {Math.max(
-            0,
-            Math.ceil(((state.turnExpiresAt || Date.now()) - now) / 1000),
+          ) : (
+            <div className="discard-placeholder">UNO</div>
           )}
         </div>
-      </div>
+      </section>
 
-      <div className={`bottom-section ${isYourTurn ? "active" : ""}`}>
+      <div className="bottom">
         <div className="your-info">
-          <h2>
-            {self?.name || "You"}
-            {state.selfId === state.hostId ? " (Host)" : ""}
-          </h2>
+          <div
+            className={`avatar ${selfIsActive ? "timer-avatar" : ""}`}
+            style={selfIsActive ? { "--timer-progress": `${timerProgress}%` } : undefined}
+          >
+            {self?.handSize ?? ""}
+          </div>
+          <div>
+            <div className="player-name">{self?.name || "You"}</div>
+            <div className="muted">{self ? `${self.handSize} cards` : ""}</div>
+          </div>
+          {selfIsActive && <div className="turn-badge">TURN</div>}
         </div>
 
-        <div className="your-hand">
+        <div className="hand">
           {state.hand.map((card) => {
             const playable = isCardPlayable(card, state);
-            const isNumber = card.type === "number";
-            const isWild = card.type === "wild" || card.type === "plus4";
             return (
               <button
                 key={card.id}
-                className={`card ${card.color || card.type} ${playable ? "playable" : ""}`}
+                className={`card small ${card.color || card.type} ${playable ? "playable" : ""}`}
                 onClick={() => onCardClick(card)}
                 disabled={!isYourTurn || !playable || !!state.winnerId}
+                title={playable ? "Play card" : "Not playable"}
               >
-                <div className="corner top-left">
-                  {isWild ? (card.type === "plus4" ? "+4" : "W") : card.display}
-                </div>
-                {isNumber ? (
-                  <div className="number">{card.display}</div>
-                ) : isWild ? (
-                  <>
-                    <div className="wild-grid">
-                      <div></div>
-                      <div></div>
-                      <div></div>
-                      <div></div>
-                    </div>
-                    <div className="corner bottom-right">
-                      {card.type === "plus4" ? "+4" : "W"}
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="symbol">{card.display}</div>
-                    <div className="corner bottom-right">{card.display}</div>
-                  </>
-                )}
+                {renderCardFace(card)}
               </button>
             );
           })}
-        </div>
-
-        <div className="actions">
-          <button
-            className="action-btn draw-btn"
-            onClick={onDraw}
-            disabled={!isYourTurn || !!state.winnerId}
-          >
-            Draw Card
-          </button>
         </div>
       </div>
 
@@ -240,6 +218,6 @@ export default function GameBoard({
           </div>
         </div>
       )}
-    </div>
+    </main>
   );
 }
